@@ -1,0 +1,64 @@
+#+title: ~org-roam-zotero~
+
+Org-Roam-Zotero is an [[https://github.com/org-roam/org-roam][org-roam]] extension that (somehow) allows you
+to create nodes for your Zotero entries and link to them.
+
+* Installation
+
+You may install ~org-roam-zotero~ with ~github~ recipes:
+
+#+begin_src elisp
+  (use-package org-roam-zotero
+    :straight
+    (:host github :repo "gudzpoz/org-roam-zotero" :branch "main" :files ("org-roam-zotero.el"))
+    :after org-roam)
+#+end_src
+
+Alternatively, since the extension is a single file, you may use a CDN mirror:
+
+#+begin_src elisp
+  (use-package org-roam-zotero
+    :straight
+    (:fetcher url :url "https://cdn.jsdelivr.net/gh/gudzpoz/org-roam-zotero@main/org-roam-zotero.el")
+    :after org-roam)
+#+end_src
+
+* Usage
+
+#+begin_quote
+Similar to the LibreOffice integration, you will need to ensure that Zotero is running.
+#+end_quote
+
+This extension works in a similar way to the [[https://github.com/zotero/zotero-libreoffice-integration][Zotero LibreOffice integration]].
+Basically, calling ~org-roam-zotero-find-node~ will have Zotero open an entry picker,
+and once you pick an Zotero entry, this extension will create an Org-roam node for it,
+or, if there is an existing node matching the Zotero entry, it will open the node.
+
+A ~ROAM_REFS~ property (and metadata including [[https://en.wikipedia.org/wiki/Digital_object_identifier][DOI]]) will be attached to nodes created by this extension.
+Call ~org-roam-open-in-zotero~ to open the corresponding entry in Zotero.
+
+** Caveats & Design Decisions
+
+- The extension uses the [[https://www.zotero.org/support/dev/client_coding/libreoffice_plugin_wire_protocol][LibreOffice wire protocol]], which makes it both off-the-shelf and constrained.
+
+- There are two kinds of Zotero links that is accessible to ~org-roam-zotero~:
+
+  - ~zotero://select/library/items/<item_id>~
+  - ~https://zotero.org/users/<user_id>/items/<item_id>~
+
+  The former one is specific to the current Zotero user on the local machine,
+  which can be quite vulnerable: switching the user immediately makes the link inaccessible.
+  The latter, while seems like an URI, leads to no where (other than a "404 Not Found" page).
+  The actual link should probably be ~https://zotero.org/<username>/items/<item_id>~,
+  but, no, the extension has no way to get the username.
+
+  The extension currently uses the latter form for no particular reason.
+  (You may also customize it via ~org-roam-zotero-filename-format~.)
+
+* TODO Road Map
+
+- [ ] Test Zotero 7 compatibility.
+- [ ] Consider publishing to MELPA.
+- [ ] Write a Zotero extension so that one can jump from an Zotero entry to Org-roam.
+  (Probably with ~org-protocol~.)
+  The extension should be optional, which means we should stick to the [[https://www.zotero.org/support/dev/client_coding/libreoffice_plugin_wire_protocol][LibreOffice wire protocol]].
